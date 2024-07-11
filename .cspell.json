@@ -1,0 +1,17 @@
+{
+    "version": "0.2",
+    "language": "en",
+    "ignoreWords": [
+    "YIARAAGAQS",
+    "lqrcod",
+    "Ooqeto"
+    ],
+    "ignorePaths": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "credentials.json"
+    ],
+    "ignoreRegExpList": [
+      "/[A-Za-z0-9-_]{20,}/"  // Ignore long strings that resemble tokens
+    ]
+}
