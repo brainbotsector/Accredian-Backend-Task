@@ -22,7 +22,7 @@ oAuth2Client.setCredentials({
   refresh_token: refresh_token,
 });
 
-// Function to refresh access token
+// Function to refresh the access token
 async function refreshAccessTokenIfNeeded() {
   try {
     const { token } = await oAuth2Client.getAccessToken();
@@ -39,7 +39,7 @@ async function refreshAccessTokenIfNeeded() {
 async function sendEmail(auth, mailOptions) {
   const gmail = google.gmail({ version: "v1", auth });
   try {
-    await refreshAccessTokenIfNeeded(); 
+    await refreshAccessTokenIfNeeded();
     const response = await gmail.users.messages.send({
       userId: "me",
       requestBody: {
@@ -69,6 +69,10 @@ function makeEmailBody(mailOptions) {
     .replace(/=+$/, "");
 }
 
+function generateReferralCode() {
+  return Math.random().toString(36).substr(2, 8).toUpperCase(); // Example: "4JF8K9P3"
+}
+
 const createReferral = async (req, res) => {
   const { referrerName, referrerEmail, refereeName, refereeEmail } = req.body;
   try {
@@ -79,7 +83,9 @@ const createReferral = async (req, res) => {
       refereeEmail,
     });
 
-    await refreshAccessTokenIfNeeded(); 
+    await refreshAccessTokenIfNeeded();
+
+    const referralCode = generateReferralCode();
 
     const newReferral = await prisma.referral.create({
       data: {
@@ -96,7 +102,15 @@ const createReferral = async (req, res) => {
       from: process.env.GMAIL_USER,
       to: refereeEmail,
       subject: "You have been referred!",
-      text: `Hi ${refereeName},\n\n${referrerName} has referred you to our platform. Join us and start learning today!\n\nBest Regards,\nAccredian`,
+      text: `        
+        <html>
+          <body>
+            <p>Hi ${refereeName},</p>
+            <p>${referrerName} has referred you to our platform. Join us and start learning today!</p>
+            <p><strong>Referral Code: ${referralCode}</strong></p>
+            <p>Best Regards,<br/>Accredian</p>
+          </body>
+        </html>`,
     };
 
     await sendEmail(oAuth2Client, mailOptions);
